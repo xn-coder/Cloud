@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v6.0.0-beta3/css/all.css" />
+    <style>
+        body {
+            background-color: #343a40;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-container {
+            background-color: #495057;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 400px; /* Max width for larger screens */
+        }
+        .login-container h2 {
+            margin-bottom: 20px;
+        }
+        .login-container .form-control {
+            background-color: #6c757d;
+            border: none;
+            color: #fff;
+        }
+        .login-container .form-control::placeholder {
+            color: #ced4da;
+        }
+        .login-container .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+        .login-container .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .hidden {
+            display: none;
+        }
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-8 col-md-6 col-lg-4">
+                <div class="login-container">
+                    <h2>Login</h2>
+                    <div class="form-group">
+                        <label for="countryCode">Country Code</label>
+                        <select class="form-control" id="countryCode">
+                            <option value="+91">India (+91)</option>
+                            <option value="+1">USA (+1)</option>
+                            <option value="+44">UK (+44)</option>
+                            <!-- Add more countries as needed -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneNumber">Phone Number</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="phoneNumber" placeholder="Phone Number">
+                            <div class="input-group-append hidden" id="editPhoneButtonGroup">
+                                <button class="btn btn-outline-secondary" type="button" id="editPhoneButton" onclick="editPhoneNumber()"><i class="fas fa-edit"></i> Edit</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-block" id="sendOtpButton" onclick="sendOtp()"><i class="fas fa-paper-plane"></i> Send OTP</button>
+                    <div class="form-group hidden" id="otpGroup">
+                        <label for="otpCode"><i class="fas fa-key"></i> OTP Code</label>
+                        <input type="text" class="form-control" id="otpCode" placeholder="OTP Code">
+                    </div>
+                    <button class="btn btn-primary btn-block hidden" id="verifyOtpButton" onclick="verify()"><i class="fas fa-check"></i> Verify OTP</button>
+                    <div class="form-group hidden" id="passwordGroup">
+                        <label for="password"><i class="fas fa-lock"></i> Password</label>
+                        <input type="password" class="form-control" id="password" placeholder="Password">
+                    </div>
+                    <button class="btn btn-primary btn-block hidden" id="loginButton" onclick="verify()"><i class="fas fa-sign-in-alt"></i> Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container">
+        <div id="toastMessage" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="2000">
+            <div class="toast-body" id="toastBody">
+                This is a toast message.
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-overlay">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+    <script>
+        var phone_code_hash = null;
+        var phoneNumber = null;
+        var countryCode = null;
+        var session_string = null;
+
+        function showLoading() {
+            document.querySelector('.loading-overlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.querySelector('.loading-overlay').style.display = 'none';
+        }
+
+        function showToast(message, isSuccess) {
+            const toastBody = document.getElementById('toastBody');
+
+            toastBody.textContent = message;
+            toastMessage.classList.remove('bg-success', 'bg-danger');
+            toastMessage.classList.add(isSuccess ? 'bg-success' : 'bg-danger');
+
+            $(toastMessage).toast('show');
+        }
+
+        function validateFields() {
+            const countryCode = document.getElementById('countryCode').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const otpCode = document.getElementById('otpCode').value;
+            const passwordGroup = document.getElementById('passwordGroup');
+            const password = document.getElementById('password').value;
+
+            if (!countryCode) {
+                showToast('Country code is required.', false);
+                return false;
+            }
+
+            if (!phoneNumber.match(/^\d{10}$/)) {
+                showToast('Phone number must be 10 digits.', false);
+                return false;
+            }
+
+            if (!otpCode.match(/^\d{5}$/)) {
+                showToast('OTP code must be 5 digits.', false);
+                return false;
+            }
+
+            if (!passwordGroup.classList.contains('hidden') && password.length < 8) {
+                showToast('Password must be at least 8 characters long.', false);
+                return false;
+            }
+
+            return true;
+        }
+
+        function sendOtp() {
+            countryCode = document.getElementById('countryCode').value;
+            phoneNumber = document.getElementById('phoneNumber').value;
+
+            const formData = new FormData();
+            formData.append('phone_number', countryCode + phoneNumber);
+
+            if (!phoneNumber.match(/^\d{10}$/)) {
+                showToast('Phone number must be 10 digits.', false);
+                return;
+            }
+
+            // Simulate sending OTP
+            showLoading();
+
+            fetch('/sign-in', {
+                method: 'POST',
+                body: formData
+            })
+            .then(async (response) => {
+                const data = await response.json();
+                hideLoading();
+                if (data.status === "success") {
+                    if(data.session_string){
+                        localStorage.setItem('session_string', data.session_string);
+                        window.location.href = "/";
+                    }
+                    phone_code_hash = data.phone_code;
+                    session_string = data.session_string;
+                    document.getElementById('otpGroup').classList.remove('hidden');
+                    document.getElementById('sendOtpButton').classList.add('hidden');
+                    document.getElementById('verifyOtpButton').classList.remove('hidden');
+                    document.getElementById('editPhoneButtonGroup').classList.remove('hidden');
+                    document.getElementById('phoneNumber').setAttribute('readonly', true);
+                    showToast('OTP sent successfully.', true);
+                } else {
+                    showToast(data.message || 'Failed to send OTP.', false);
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showToast('An error occurred. Please try again.', false);
+            });
+        }
+
+        function editPhoneNumber() {
+            document.getElementById('phoneNumber').removeAttribute('readonly');
+            document.getElementById('editPhoneButtonGroup').classList.add('hidden');
+            document.getElementById('sendOtpButton').classList.remove('hidden');
+            document.getElementById('otpGroup').classList.add('hidden');
+            document.getElementById('verifyOtpButton').classList.add('hidden');
+            document.getElementById('passwordGroup').classList.add('hidden'); // Hide password field
+            document.getElementById('loginButton').classList.add('hidden'); // Hide login button
+        }
+
+        function verify() {
+            const otpCode = document.getElementById('otpCode').value;
+            const password = document.getElementById('password').value;
+
+            if (!otpCode.match(/^\d{5}$/)) {
+                showToast('OTP code must be 5 digits.', false);
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('phone_number', countryCode + phoneNumber);
+            formData.append('code', otpCode);
+            formData.append('phone_code_hash', phone_code_hash);
+            if(password){
+                formData.append('password', password);
+            }
+
+            fetch('/verify-code', {
+                method: 'POST',
+                body: formData
+            })
+            .then(async (response) => {
+                const data = await response.json();
+                hideLoading();
+                if (data.status === "success") {
+                    if(data.session_string){
+                        localStorage.setItem('session_string', data.session_string);
+                        window.location.href = "/";
+                    }
+                    showToast(data.message || 'Signed in successfully.', true);
+                } else if (data.status === "error" && data.message === "2FA enabled") {
+                    document.getElementById('otpCode').setAttribute('readonly', true);
+                    document.getElementById('passwordGroup').classList.remove('hidden');
+                    document.getElementById('verifyOtpButton').classList.add('hidden');
+                    document.getElementById('loginButton').classList.remove('hidden');
+                } else {
+                    showToast(data.message || 'Failed to verify OTP.', false);
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showToast('An error occurred. Please try again.', false);
+            });
+        }
+
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

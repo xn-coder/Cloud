@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cloud storage</title>
+    <link rel="icon" href="/favicon.ico" type="image/icon">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v6.0.0-beta3/css/all.css" />
+    <style>
+        :root {
+            --primary-color: rgb(147, 149, 220);
+            --hover-color: rgb(177, 178, 240);
+            --background-color: rgb(92, 92, 154);
+        }
+        * {
+            box-sizing: border-box;
+            list-style: none;
+            text-decoration: none;
+        }
+
+        body {
+            background: #212121;
+            margin: 0;
+            font-family: monospace;
+        }
+
+        div.nav {
+            display: flex;
+            width: 100%;
+            background-color: rgb(67, 67, 117);
+            padding: 15px 7%;
+            align-items: center;
+        }
+
+        div.nav ul {
+            position: static;
+            display: flex;
+            margin: 0;
+            padding-left: 0;
+            z-index: 1;
+        }
+
+        .no-scroll {
+            overflow: hidden;
+        }
+
+        div.nav ul li {
+            display: flex;
+            margin: 0 5px;
+            font-size: 18px;
+        }
+
+        div.nav ul li a {
+            border-radius: 5px;
+            padding: 5px 20px;
+            color: var(--primary-color);
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        div.menu-btn {
+            font-size: 22px;
+            padding: 5px 10px;
+            color: rgb(106, 108, 215);
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+        }
+
+        div.menu-btn:hover {
+            color: var(--hover-color);
+            background-color: var(--background-color);
+        }
+
+        div.nav ul li a:hover,
+        div.nav ul li a:focus {
+            color: var(--hover-color);
+            background-color: var(--background-color);
+        }
+
+        div.progress {
+            color: white;
+            font-size: 16px;
+            margin-left: auto;
+            display: none;
+        }
+
+        div.progress progress {
+            width: 100%;
+        }
+
+        div.upload-files {
+            position: fixed;
+            bottom: 5%;
+            right: 5%;
+        }
+
+        label.cssbuttons-io-button {
+            align-items: center;
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 17px;
+            padding: 0.5em 1em 0.5em 1em;
+            color: white;
+            background: #ad5389;
+            background: linear-gradient(0deg, rgb(120, 47, 255) 0%, rgb(185, 132, 255) 100%);
+            border: none;
+            box-shadow: 0 0.7em 1.5em -0.5em rgb(184, 146, 255);
+            letter-spacing: 0.02em;
+            border-radius: 20em;
+        }
+
+        label.cssbuttons-io-button:hover {
+            box-shadow: 0 0.5em 1.5em -0.5em rgb(149, 91, 255);
+        }
+
+        label.cssbuttons-io-button:active {
+            box-shadow: 0 0.3em 1em -0.5em rgb(160, 109, 255);
+        }
+
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            grid-auto-rows: auto;
+            padding: 20px;
+            gap: 10px;
+        }
+
+        div.item_date {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        div.item_date span {
+            background-color: rgb(95, 95, 112);
+            padding: 7px 10px;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .gallery_timestamb {
+            position: absolute;
+            top: 5%;
+            right: 5%;
+            font-size: 14px;
+            color: white;
+            text-shadow: 1px 1px 5px #000,
+                1px 1px 5px #000;
+            margin: 0;
+        }
+
+        .gallery_play {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            display: none; /* Initially hidden */
+        }
+
+        .gallery__item.video:hover .gallery_play {
+            display: flex; /* Show on hover for video items */
+        }
+
+        .gallery_duration {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 12px;
+            display: none; /* Initially hidden */
+        }
+
+        .gallery__item.video .gallery_duration {
+            display: block; /* Always show for video items */
+        }
+
+        .gallery__item {
+            position: relative;
+            z-index: 0;
+            height: 150px;
+            border-radius: 10px;
+        }
+
+        .gallery__img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery__title {
+            position: absolute;
+            bottom: 0;
+            color: white;
+            background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 1));
+            width: 100%;
+            margin: 0;
+            padding: 10px;
+        }
+
+        .showMedia {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .showMedia__image {
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        div.showMedia div.options {
+            color: white;
+            position: absolute;
+            right: 5%;
+            top: 3%;
+            font-size: 30px;
+            display: flex;
+        }
+
+        div.showMedia div.options div {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 10px;
+            cursor: pointer;
+        }
+
+        div.showMedia div.options div.download i, div.showMedia div.options div.remove i {
+            font-size: 25px;
+        }
+
+        .loader {
+            width: 60px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            justify-content: space-evenly;
+        }
+
+        .ball {
+            list-style: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #fff;
+        }
+
+        .ball:nth-child(1) {
+            animation: bounce-1 2.1s ease-in-out infinite;
+        }
+
+        @keyframes bounce-1 {
+            50% {
+                transform: translateY(-18px);
+            }
+        }
+
+        .ball:nth-child(2) {
+            animation: bounce-3 2.1s ease-in-out 0.3s infinite;
+        }
+
+        @keyframes bounce-2 {
+            50% {
+                transform: translateY(-18px);
+            }
+        }
+
+        .ball:nth-child(3) {
+            animation: bounce-3 2.1s ease-in-out 0.6s infinite;
+        }
+
+        @keyframes bounce-3 {
+            50% {
+                transform: translateY(-18px);
+            }
+        }
+
+        @media (max-width:518px) {
+            .gallery-container {
+                grid-template-columns: repeat(3, 1fr);
+                width: 99%;
+                margin: auto;
+            }
+            .gallery__item {
+                position: relative;
+                z-index: 0;
+                height: 100px;
+                border-radius: 10px;
+            }
+            div.nav ul {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top:5%;
+                margin: 5px 0 0 20px;
+                background-color: rgb(46, 46, 83);
+                border-radius: 5px;
+            }
+            div.nav ul li {
+                width: 100%;
+                margin: 0;
+                display: flex;
+                border-bottom: 1px solid #5960ad;
+            }
+            div.nav ul li:last-child {
+                border: none;
+            }
+            div.nav ul li a {
+                padding: 10px 20px;
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+            }
+            div.menu-btn {
+                display: block;
+            }
+        }
+
+        @media (min-width:519px) and (max-width:767px) {
+            .gallery-container {
+                grid-template-columns: repeat(4, 1fr);
+                width: 97%;
+                margin: auto;
+            }
+            div.nav ul {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top:5%;
+                margin: 5px 0 0 20px;
+                background-color: rgb(46, 46, 83);
+                border-radius: 5px;
+            }
+            div.nav ul li {
+                width: 100%;
+                margin: 0;
+                display: flex;
+                border-bottom: 1px solid #5960ad;
+            }
+            div.nav ul li:last-child {
+                border: none;
+            }
+            div.nav ul li a {
+                padding: 10px 20px;
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+            }
+            div.menu-btn {
+                display: block;
+            }
+        }
+
+        @media (min-width:768px) and (max-width:1023px) {
+            .gallery-container {
+                grid-template-columns: repeat(5, 1fr);
+                width: 95%;
+                margin: auto;
+            }
+        }
+
+        /* WEB */
+        @media (min-width:1024px) {
+            .gallery-container {
+                grid-template-columns: repeat(6, 1fr);
+                width: 90%;
+                margin: auto;
+            }
+            .showMedia__image {
+                max-width: 80%;
+                max-height: 80%;
+            }
+        }
+
+        .drop-zone {
+            position: fixed;
+            top: 0;
+            left: 0;
+            margin: 50px;
+            width: calc(100% - 100px);
+            height: calc(100% - 100px);
+            border: 2px dashed #f57fc6;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: #f57fc6;
+            font-size: 24px;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+        }
+
+        .drop-zone.dragover {
+            background-color: rgba(173, 83, 137, 0.1);
+        }
+
+        .upload-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 1001;
+            display: none;
+            width: 300px; /* Fixed width */
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .file-thumbnail {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+        .file-info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .file-name {
+            margin-bottom: 5px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        .progress-bar {
+            background-color: #007bff;
+            height: 5px;
+            width: 0;
+        }
+        .gallery__checkbox {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: none;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            appearance: none;
+            background-color: #fff;
+            border: 2px solid #ccc;
+            border-radius: 3px;
+        }
+        .gallery__checkbox:checked {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .gallery__checkbox:checked::after {
+            content: '\2713'; /* Unicode for checkmark */
+            color: white;
+            font-size: 14px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .gallery__item:hover .gallery__checkbox {
+            display: block;
+        }
+        .menu-options {
+            display: none;
+            color: white;
+            position: fixed;
+            bottom: 0;
+            right: 5%;
+            z-index: 1001;
+        }
+        .menu-options button {
+            margin: 5px;
+            padding: 10px;
+            background-color: #333;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="nav">
+        <div class="menu-btn">
+            <i class="fa-solid fa-bars"></i>
+        </div>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/">About</a></li>
+            <li><a href="/">Contact Us</a></li>
+            <li><a id="logout">Logout</a></li>
+        </ul>
+        <div class="menu-options" id="menu-options">
+            <button id="download-selected">Download Selected</button>
+            <button id="remove-selected">Remove Selected</button>
+        </div>
+    </div>
+    <div class="gallery-container">
+    </div>
+    <div class="upload-files">
+        <form id="upload-form" enctype="multipart/form-data">
+            <input type="file" id="fileInput" multiple name="file" accept="image/*,video/*" style="display: none" />
+            <label for="fileInput" class="cssbuttons-io-button">
+                <svg viewBox="0 0 640 512" fill="white" height="1em" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M144 480C64.5 480 0 415.5 0 336c0-62.8 40.2-116.2 96.2-135.9c-.1-2.7-.2-5.4-.2-8.1c0-88.4 71.6-160 160-160c59.3 0 111 32.2 138.7 80.2C409.9 102 428.3 96 448 96c53 0 96 43 96 96c0 12.2-2.3 23.8-6.4 34.6C596 238.4 640 290.1 640 352c0 70.7-57.3 128-128 128H144zm79-217c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l39-39V392c0 13.3 10.7 24 24 24s24-10.7 24-24V257.9l39 39c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-80-80c-9.4-9.4-24.6-9.4-33.9 0l-80 80z">
+                    </path>
+                </svg>
+                <span>Upload</span>
+            </label>
+        </form>
+    </div>
+    <div class="showMedia">
+        <div class="options">
+            <div class="download">
+                <i class="fa-solid fa-download"></i>
+            </div>
+            <div class="remove">
+                <i class="fa-solid fa-trash"></i>
+            </div>
+            <div class="close">
+                <i class="fa-regular fa-xmark"></i>
+            </div>
+        </div>
+        <div class="loader">
+            <li class="ball"></li>
+            <li class="ball"></li>
+            <li class="ball"></li>
+        </div>
+    </div>
+    <div class="drop-zone" id="drop-zone">
+        Drag & Drop files here or click to upload
+    </div>
+    <div class="upload-popup" id="upload-popup">
+        <ul id="file-list" style="padding-left: 0;"></ul>
+    </div>
+    <script>
+        const sessionString = localStorage.getItem('session_string');
+        let offsetId = 0;
+        let lastDate = "", firstDate = "";
+        let isRequestInProgress = false;
+        const fileList = document.getElementById("file-list");
+        const uploadPopup = document.getElementById('upload-popup');
+        const eventSource = new EventSource("/sse/progress/");
+        let isProcessing = false;
+        let fileQueue = [];
+
+        function observeLastGalleryItem() {
+            const galleryItems = document.querySelectorAll('.gallery__item');
+            const lastGalleryItem = galleryItems[galleryItems.length - 1];
+
+            if (lastGalleryItem) {
+                const observer = new IntersectionObserver((entries) => {
+                    if (entries[0].isIntersecting) {
+                        listMedia()
+                        observer.unobserve(lastGalleryItem);
+                    }
+                }, {
+                    root: document.querySelector(".gallery-container"),
+                    rootMargin: '0px',
+                    threshold: 1.0
+                });
+
+                observer.observe(lastGalleryItem);
+            }
+        }
+
+        async function sendRequest(type, id) {
+            try {
+                const response = await fetch(`/media/?session_string=${sessionString}&type=${type}&id=${id}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const element = document.querySelector(`#i${id}`);
+                    element.src = data['src'];
+                    if (data['type'] === "video") {
+                        document.querySelector(`#t${id}`).innerText = data['duration'];
+                    }
+                } else {
+                    sendRequest(type, id);
+                }
+            } catch (error) {
+                console.error('Error fetching media:', error);
+            }
+        }
+
+        function displayMedia(id, type, message) {
+            const showmedia = document.getElementsByClassName("showMedia")[0];
+            const closeBtn = document.getElementsByClassName("close")[0];
+            const downloadBtn = document.getElementsByClassName("download")[0];
+            const removeBtn = document.getElementsByClassName("remove")[0];
+            const loader = document.getElementsByClassName("loader")[0];
+            document.querySelector(".nav ul").style.zIndex = 0;
+            
+            const handleClose = function() {
+                loader.style.display = "flex";
+                showmedia.style.display = "none";
+                document.body.classList.remove("no-scroll");
+                if (document.getElementsByClassName("showMedia__image").length > 0)
+                    document.getElementsByClassName("showMedia__image")[0].remove();
+                closeBtn.removeEventListener("click", handleClose);
+            }
+            closeBtn.addEventListener("click", handleClose);
+
+            const handleDownload = function() {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', `/download/${id}?session_string=${sessionString}`);
+                xhr.responseType = 'blob';
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        const blob = xhr.response;
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = message.substring(message.lastIndexOf("-")+1, message.length) + "." + message.substring(message.lastIndexOf("-", 13)+1, message.lastIndexOf("-"));
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    } else {
+                        const downloadResult = JSON.parse(xhr.responseText);
+                        alert(downloadResult.detail);
+                    }
+                    downloadBtn.removeEventListener("click", handleDownload);
+                };
+                xhr.send();
+            }
+            downloadBtn.addEventListener("click", handleDownload);
+
+            const handleRemove = function() {
+                let rmid = message.substring(message.lastIndexOf("-")+1, message.lastIndexOf("-")+9);
+                document.getElementById(id).remove();
+                if (document.getElementById(rmid).nextSibling.classList.contains("item_date"))
+                    document.getElementById(rmid).remove();
+                removeBtn.removeEventListener("click", handleRemove);
+                closeBtn.click()
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', `/remove/?session_string=${sessionString}&id=${id}`);
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        const data = JSON.parse(xhr.responseText);
+                        if (data.message) {
+                            console.log(data.message);
+                        }
+                    }
+                };
+                xhr.send();
+            }
+            removeBtn.addEventListener("click", handleRemove);
+
+            showmedia.style.display = "flex";
+            document.body.classList.add("no-scroll");
+
+            if (type == "image") {
+                const image = document.createElement("img");
+                image.classList.add("showMedia__image");
+                image.src = document.querySelector("#i" + id).src;
+                showmedia.appendChild(image);
+                loader.style.display = "none";
+            } else {
+                const videoElement = document.createElement('video');
+                videoElement.classList.add("showMedia__image");
+                videoElement.poster = document.querySelector("#i" + id).src;
+                showmedia.appendChild(videoElement);
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', `/stream/${id}?session_string=${sessionString}`);
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        videoElement.src = `/stream/${id}?session_string=${sessionString}`;
+                        videoElement.controls = true;
+                        videoElement.load();
+                        videoElement.play();
+                        loader.style.display = "none";
+                    } else {
+                        const result = JSON.parse(xhr.responseText);
+                        alert(result.detail);
+                    }
+                };
+                xhr.send();
+            }
+        }
+
+        function mediaGallery(type, id, message, pos) {
+            let gallery_item = document.createElement("div");
+            let gallery_img = document.createElement("img");
+            let gallery__title = document.createElement("h2");
+            let gallery_checkbox = document.createElement("input");
+            gallery_checkbox.type = "checkbox";
+            gallery_checkbox.classList.add("gallery__checkbox");
+            gallery_checkbox.addEventListener('change', handleCheckboxChange);
+            const date = message.substring(message.lastIndexOf("-")+1, message.lastIndexOf("-")+9);
+
+            gallery_item.classList.add("gallery__item");
+            if (type === "video") {
+                gallery_item.classList.add("video");
+                let playIcon = document.createElement("div");
+                playIcon.classList.add("gallery_play");
+                playIcon.innerHTML = '<i class="fa fa-play"></i>';
+                gallery_item.appendChild(playIcon);
+
+                let duration = document.createElement("div");
+                duration.classList.add("gallery_duration");
+                duration.id = "t" + id;
+                gallery_item.appendChild(duration);
+            }
+
+            gallery_item.addEventListener('click', function(event) {
+                if (!event.target.classList.contains('gallery__checkbox')) {
+                    displayMedia(id, type, message);
+                }
+            });
+
+            gallery_img.id = "i" + id;
+            gallery_img.classList.add("gallery__img");
+            gallery__title.classList.add("gallery__title");
+
+            gallery_item.id = id;
+            gallery_item.appendChild(gallery_checkbox);
+            gallery_item.appendChild(gallery_img);
+            gallery_item.appendChild(gallery__title);
+
+            const galleryContainer = document.querySelector(".gallery-container");
+            const itemDate = document.getElementById(date);
+
+            if(itemDate == null && !pos) {
+                const item_date = document.createElement("div");
+                item_date.classList.add("item_date");
+                item_date.id = date;
+                item_date.innerHTML = "<span>" + date.substring(6, 8) + "-" + date.substring(4, 6) + "-" + date.substring(0, 4) + "</span>";
+                galleryContainer.appendChild(item_date);
+            } else if(itemDate == null && pos) {
+                const item_date = document.createElement("div");
+                item_date.classList.add("item_date");
+                item_date.id = date;
+                item_date.innerHTML = "<span>" + date.substring(6, 8) + "-" + date.substring(4, 6) + "-" + date.substring(0, 4) + "</span>";
+                galleryContainer.insertBefore(item_date, galleryContainer.firstChild.nextSibling);
+            }
+
+            if (pos) {
+                galleryContainer.insertBefore(gallery_item, document.getElementById(date).nextSibling);
+            } else {
+                galleryContainer.appendChild(gallery_item);
+            }
+            
+            sendRequest(type, id);
+            
+            if (!pos) {
+                observeLastGalleryItem();
+            }
+        }
+
+        function listMedia() {
+            if (isRequestInProgress) return;
+            isRequestInProgress = true;
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `/list-files/?session_string=${sessionString}&offset=${offsetId}`);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    const results = JSON.parse(xhr.responseText);
+                    try {
+                        offsetId = results.offset_id
+                        for(let i=0; i<results.files.length; i++) {
+                            mediaGallery(results.files[i].type, results.files[i].id, results.files[i].message, false);
+                        }
+                    }
+                    catch (error) {
+                        alert(error)
+                    }
+                } else {
+                    console.log(xhr.responseText);
+                    location.href = "/login"
+                }
+                isRequestInProgress = false;
+            };
+            xhr.send();
+        }
+
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            dropZone.style.display = 'none';
+            addFilesToQueue(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            e.preventDefault();
+            handleFiles(e.target.files);
+        });
+
+        function addFilesToQueue(files) {
+            for (const file of files) {
+                fileQueue.push(file);
+                const listItem = document.createElement('li');
+                listItem.id = "file-" + file.name;
+                listItem.classList.add('file-item');
+
+                const thumbnail = document.createElement('img');
+                thumbnail.classList.add('file-thumbnail');
+                listItem.appendChild(thumbnail);
+
+                const fileInfo = document.createElement('div');
+                fileInfo.classList.add('file-info');
+
+                const fileName = document.createElement('div');
+                fileName.classList.add('file-name');
+                fileName.textContent = file.name;
+                fileInfo.appendChild(fileName);
+
+                const progressBar = document.createElement('div');
+                progressBar.classList.add('progress-bar');
+                fileInfo.appendChild(progressBar);
+
+                listItem.appendChild(fileInfo);
+                fileList.appendChild(listItem);
+
+                file.listItem = listItem;
+                file.thumbnail = thumbnail;
+                file.progressBar = progressBar;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    if (file.type.startsWith('image/')) {
+                        file.thumbnail.src = event.target.result;
+                    } else if (file.type.startsWith('video/')) {
+                        generateVideoThumbnail(event.target.result, file.thumbnail);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+            if (!isProcessing) {
+                processQueue();
+            }
+        }
+
+        function generateVideoThumbnail(videoSrc, thumbnailElement) {
+            const video = document.createElement('video');
+            video.src = videoSrc;
+            video.muted = true;
+            video.playsInline = true;
+            video.currentTime = 1; // Capture thumbnail at 1 second
+
+            video.addEventListener('loadeddata', () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                thumbnailElement.src = canvas.toDataURL('image/png');
+            });
+        }
+
+        const MAX_CONCURRENT_UPLOADS = 3;
+        let activeUploads = 0;
+
+        function processQueue() {
+            if (fileQueue.length === 0) {
+                uploadPopup.style.display = 'none';
+                isProcessing = false;
+                return;
+            }
+
+            if (activeUploads >= MAX_CONCURRENT_UPLOADS) return;
+
+            isProcessing = true;
+            uploadPopup.style.display = 'block';
+
+            const file = fileQueue.shift();
+            activeUploads++;
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('session_string', sessionString);
+            const xhr = new XMLHttpRequest();
+
+            xhr.upload.addEventListener("progress", (event) => {
+                if (event.lengthComputable) {
+                    const percentComplete = (event.loaded / event.total) * 50;
+                    file.progressBar.style.width = `${percentComplete}%`;
+                    // ... existing eventSource code ...
+                }
+            });
+
+            xhr.onload = async () => {
+                activeUploads--;
+                if (xhr.status === 200) {
+                    const data = JSON.parse(xhr.responseText);
+                    mediaGallery(data.file.type, data.file.id, data.file.message, true);
+                } else {
+                    console.error('Upload failed:', xhr.responseText);
+                }
+                processQueue();
+            };
+
+            xhr.onerror = () => {
+                activeUploads--;
+                console.error('Upload failed');
+                processQueue();
+            };
+
+            xhr.open('POST', `/upload/`);
+            xhr.send(formData);
+
+            processQueue(); // Start next upload if possible
+        }
+
+        document.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            dropZone.style.display = 'flex';
+        });
+
+        document.addEventListener('dragleave', (e) => {
+            if (e.target === dropZone) {
+                dropZone.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('drop', (e) => {
+            dropZone.style.display = 'none';
+        });
+
+        document.getElementById("logout").addEventListener("click", function() {
+            const formData = new FormData();
+            formData.append('session_string', sessionString);
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `/logout`);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    localStorage.clear();
+                    location.reload();
+                }
+            };
+            xhr.send(formData);
+        });
+
+        document.getElementsByClassName("menu-btn")[0].addEventListener("click", function() {
+            const navUl = document.querySelector(".nav ul");
+            const mediaQuery = window.matchMedia("(max-width: 767px)");
+            const nav = document.querySelector(".nav ul");
+            
+            function handleNavDisplay() {
+                if (mediaQuery.matches) {
+                    if (navUl.style.display === "flex") {
+                        navUl.style.display = "none";
+                    } else {
+                        navUl.style.display = "flex";
+                        nav.style.zIndex = "1";
+                        document.addEventListener("click", function hideNav(event) {
+                            if (!navUl.contains(event.target) && !event.target.closest(".menu-btn")) {
+                                navUl.style.display = "none";
+                                document.removeEventListener("click", hideNav);
+                            }
+                        });
+                    }
+                } else {
+                    navUl.style.display = "flex";
+                    nav.style.zIndex = "1";
+                }
+            }
+
+            mediaQuery.addEventListener("change", handleNavDisplay);
+            handleNavDisplay();
+        });
+
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        const handleCheckboxChange = debounce(() => {
+            const checkboxes = document.querySelectorAll('.gallery__checkbox');
+            const menuOptions = document.getElementById('menu-options');
+            const anyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+
+            checkboxes.forEach(checkbox => {
+                checkbox.style.display = anyChecked ? 'block' : 'none';
+            });
+
+            menuOptions.style.display = anyChecked ? 'block' : 'none';
+        }, 300);
+
+        function showCheckbox(event) {
+            event.currentTarget.querySelector('.gallery__checkbox').style.display = 'block';
+        }
+
+        function hideCheckbox(event) {
+            event.currentTarget.querySelector('.gallery__checkbox').style.display = 'none';
+        }
+
+        document.getElementById('download-selected').addEventListener('click', async function() {
+            const selectedItems = document.querySelectorAll('.gallery__checkbox:checked');
+            const formData = new FormData();
+            formData.append('session_string', sessionString);
+            selectedItems.forEach(item => {
+                const id = item.parentElement.id.replace(/^\D+/g, '');
+                formData.append('ids', id);
+            });
+            try {
+                const response = await fetch('/download-all/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = response.headers.get("Content-Disposition").split("filename=")[1].substring(1, response.headers.get("Content-Disposition").split("filename=")[1].length-1);
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    const error = await response.json();
+                    alert(error.detail);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        document.getElementById('remove-selected').addEventListener('click', function() {
+            const selectedItems = document.querySelectorAll('.gallery__checkbox:checked');
+            const formData = new FormData();
+            formData.append('session_string', sessionString);
+            selectedItems.forEach(item => {
+                const id = item.parentElement.id.replace(/^\D+/g, '');
+                document.getElementById(id).remove();
+                formData.append('ids', id);
+            });
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `/remove-all/`);
+            xhr.send(formData);
+        });
+
+        // Initialize hover behavior
+        document.querySelectorAll('.gallery__item').forEach(item => {
+            item.addEventListener('mouseenter', showCheckbox);
+            item.addEventListener('mouseleave', hideCheckbox);
+        });
+
+        // Function to show the upload popup
+        function showUploadPopup() {
+            const uploadPopup = document.getElementById('upload-popup');
+            uploadPopup.style.display = 'block';
+        }
+
+        // Function to hide the upload popup
+        function hideUploadPopup() {
+            const uploadPopup = document.getElementById('upload-popup');
+            uploadPopup.style.display = 'none';
+        }
+
+        if (sessionString)
+            listMedia()
+        else
+            location.href = "/login"
+
+    </script>
+</body>
+
+</html>
