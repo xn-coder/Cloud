@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+telethon
+cryptography
+python-multipart
