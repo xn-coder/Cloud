@@ -9,7 +9,7 @@ import datetime
 import base64
 from fastapi.requests import Request
 from telethon.sessions import StringSession
-# from fastapi.templating import Jinja2Templates
+from fastapi.templating import Jinja2Templates
 import asyncio
 from cryptography.fernet import Fernet
 import zipfile
@@ -21,9 +21,10 @@ key = 'V-mbvTB1fAM9EP-gPN0BhwvMZbJyFMsB_Mv9BFJFupk='
 
 app = FastAPI()
 
-# templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="templates")
 
 app.add_middleware(
+    CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
@@ -66,16 +67,16 @@ async def sse_progress():
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 @app.get("/")
-async def home():
-    return {"message": "Hello World"}
+async def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
-# @app.get("/login")
-# async def login(request: Request):
-#     return templates.TemplateResponse("login.html", {"request": request})
+@app.get("/login")
+async def login(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
 
-# @app.get("/verify")
-# async def verify(request: Request):
-#     return templates.TemplateResponse("verify.html", {"request": request})
+@app.get("/verify")
+async def verify(request: Request):
+    return templates.TemplateResponse("verify.html", {"request": request})
 
 @app.post("/sign-in/")
 async def sign_in(phone_number: str = Form(...)):
