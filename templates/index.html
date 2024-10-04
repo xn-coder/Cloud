@@ -10,36 +10,120 @@
     <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v6.0.0-beta3/css/all.css" />
     <style>
         :root {
-            --primary-color: rgb(147, 149, 220);
-            --hover-color: rgb(177, 178, 240);
-            --background-color: rgb(92, 92, 154);
-        }
-        * {
-            box-sizing: border-box;
-            list-style: none;
-            text-decoration: none;
+            --primary-color: #8e44ad;
+            --hover-color: #9b59b6;
+            --background-color: #2c3e50;
+            --text-color: #ecf0f1;
         }
 
         body {
-            background: #212121;
+            background: var(--background-color);
             margin: 0;
-            font-family: monospace;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
         }
 
         div.nav {
             display: flex;
-            width: 100%;
-            background-color: rgb(67, 67, 117);
-            padding: 15px 7%;
+            justify-content: space-between;
             align-items: center;
+            padding: 15px 7%;
+            background-color: var(--primary-color);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         div.nav ul {
-            position: static;
             display: flex;
-            margin: 0;
-            padding-left: 0;
-            z-index: 1;
+            gap: 15px;
+        }
+
+        div.nav ul li a {
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        div.nav ul li a:hover {
+            background-color: var(--hover-color);
+            color: var(--text-color);
+        }
+
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .gallery__item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+
+        .gallery__item:hover {
+            transform: scale(1.05);
+        }
+
+        .gallery__img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.3s;
+        }
+
+        .gallery__title {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        .cssbuttons-io-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: var(--text-color);
+            border-radius: 50px;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .cssbuttons-io-button:hover {
+            background-color: var(--hover-color);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            div.nav ul {
+                flex-direction: column;
+                background-color: var(--background-color);
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                display: none;
+            }
+
+            div.menu-btn {
+                display: block;
+                cursor: pointer;
+            }
+
+            div.menu-btn:hover {
+                color: var(--hover-color);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            list-style: none;
+            text-decoration: none;
         }
 
         .no-scroll {
@@ -119,14 +203,6 @@
 
         label.cssbuttons-io-button:active {
             box-shadow: 0 0.3em 1em -0.5em rgb(160, 109, 255);
-        }
-
-        .gallery-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            grid-auto-rows: auto;
-            padding: 20px;
-            gap: 10px;
         }
 
         div.item_date {
@@ -224,11 +300,27 @@
             justify-content: center;
             align-items: center;
             background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px); /* Add blur effect */
+            z-index: 1003;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out; /* Smooth fade-in */
+        }
+
+        .showMedia.active {
+            display: flex;
+            opacity: 1;
         }
 
         .showMedia__image {
             max-width: 90%;
             max-height: 90%;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .showMedia__image:hover {
+            transform: scale(1.05);
         }
 
         div.showMedia div.options {
@@ -238,20 +330,29 @@
             top: 3%;
             font-size: 30px;
             display: flex;
+            gap: 15px;
         }
 
         div.showMedia div.options div {
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             display: flex;
             justify-content: center;
             align-items: center;
             margin: 0 10px;
             cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: background-color 0.3s, transform 0.3s;
         }
 
-        div.showMedia div.options div.download i, div.showMedia div.options div.remove i {
-            font-size: 25px;
+        div.showMedia div.options div:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+            transform: scale(1.1);
+        }
+
+        div.showMedia div.options div i {
+            font-size: 20px;
         }
 
         .loader {
@@ -423,47 +524,52 @@
             background-color: rgba(173, 83, 137, 0.1);
         }
 
-        .upload-popup {
+        #upload-popup {
             position: fixed;
-            top: 20px;
+            top: 50%;
             right: 20px;
+            transform: translateY(-50%);
             background-color: #333;
             color: white;
             padding: 10px;
             border-radius: 5px;
-            z-index: 1001;
-            display: none;
             width: 300px; /* Fixed width */
             overflow-y: auto;
             max-height: 80vh;
         }
+
         .file-item {
             display: flex;
             align-items: center;
             margin-bottom: 10px;
         }
+
         .file-thumbnail {
             width: 50px;
             height: 50px;
             object-fit: cover;
             margin-right: 10px;
         }
+        
         .file-info {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
+
         .file-name {
             margin-bottom: 5px;
             word-wrap: break-word;
             white-space: pre-wrap;
         }
+
         .progress-bar {
             background-color: #007bff;
             height: 5px;
             width: 0;
         }
+
         .gallery__checkbox {
             position: absolute;
             top: 5px;
@@ -477,10 +583,12 @@
             border: 2px solid #ccc;
             border-radius: 3px;
         }
+
         .gallery__checkbox:checked {
             background-color: #007bff;
             border-color: #007bff;
         }
+
         .gallery__checkbox:checked::after {
             content: '\2713'; /* Unicode for checkmark */
             color: white;
@@ -490,46 +598,188 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
+
         .gallery__item:hover .gallery__checkbox {
-            display: block;
+            display: block; /* Show on hover */
         }
+
+        .show-checkboxes .gallery__checkbox {
+            display: block; /* Show all checkboxes when class is added */
+        }
+
         .menu-options {
-            display: none;
+            display: none; /* Initially hidden */
             color: white;
             position: fixed;
-            bottom: 0;
             right: 5%;
             z-index: 1001;
         }
+
         .menu-options button {
             margin: 5px;
-            padding: 10px;
+            padding: 10px 20px;
             background-color: #333;
             border: none;
             border-radius: 5px;
             color: white;
             cursor: pointer;
         }
+
+        .animated-logout-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            z-index: 1002; /* Ensure this is lower than the showMedia z-index */
+        }
+
+        .animated-logout-button:hover {
+            background-color: var(--hover-color);
+            transform: scale(1.1);
+        }
+
+        .gallery-container {
+            width: 90%; /* Adjust as needed */
+            margin: auto;
+        }
+
+        .floating-bar {
+            position: fixed;
+            margin-top: 10px;
+            top: -100px; /* Start off-screen */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%; /* Match the gallery container width */
+            max-width: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 50px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            border-radius: 10px; /* Add border radius */
+            transition: transform 0.5s ease, opacity 0.5s ease; /* Smooth transition */
+        }
+
+        .floating-bar.show {
+            transform: translate(-50%, 100px); /* Move into view */
+            opacity: 1; /* Ensure it's visible */
+        }
+
+        .floating-bar button {
+            margin: 0 10px;
+            padding: 10px;
+            background-color: #333;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 18px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .floating-bar button:hover {
+            background-color: #555;
+        }
+
+        .floating-bar span {
+            margin-right: auto;
+            font-size: 16px;
+        }
+
+        .profile-menu {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .profile-icon {
+            font-size: 40px;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: transform 0.3s, color 0.3s;
+        }
+
+        .profile-icon:hover {
+            transform: scale(1.1);
+            color: var(--hover-color);
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: #444;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1003;
+            overflow: hidden;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .dropdown-menu a:hover {
+            background-color: #555;
+            color: #f0f0f0;
+        }
+
+        .dropdown-menu a:first-child {
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .dropdown-menu a:last-child {
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
     </style>
 </head>
 
 <body>
-    <div class="nav">
-        <div class="menu-btn">
-            <i class="fa-solid fa-bars"></i>
-        </div>
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/">About</a></li>
-            <li><a href="/">Contact Us</a></li>
-            <li><a id="logout">Logout</a></li>
-        </ul>
-        <div class="menu-options" id="menu-options">
-            <button id="download-selected">Download Selected</button>
-            <button id="remove-selected">Remove Selected</button>
-        </div>
-    </div>
     <div class="gallery-container">
+    </div>
+    <div class="floating-bar" id="floating-bar">
+        <span id="selected-count">0 items selected</span>
+        <button id="download-selected" title="Download">
+            <i class="fa fa-download"></i>
+        </button>
+        <button id="remove-selected" title="Remove">
+            <i class="fa fa-trash"></i>
+        </button>
+        <button id="close-bar" title="Close">
+            <i class="fa fa-times"></i>
+        </button>
     </div>
     <div class="upload-files">
         <form id="upload-form" enctype="multipart/form-data">
@@ -565,16 +815,23 @@
     <div class="drop-zone" id="drop-zone">
         Drag & Drop files here or click to upload
     </div>
-    <div class="upload-popup" id="upload-popup">
+    <div id="upload-popup">
         <ul id="file-list" style="padding-left: 0;"></ul>
     </div>
+    <div class="profile-menu">
+        <i class="fas fa-user-circle profile-icon" id="profile-icon"></i>
+        <div class="dropdown-menu" id="dropdown-menu">
+            <a href="/profile">Profile</a>
+            <a href="#" id="logout">Logout</a>
+        </div>
+    </div>
     <script>
+        // Removed nav bar related JavaScript
         const sessionString = localStorage.getItem('session_string');
         let offsetId = 0;
         let lastDate = "", firstDate = "";
         let isRequestInProgress = false;
         const fileList = document.getElementById("file-list");
-        const uploadPopup = document.getElementById('upload-popup');
         const eventSource = new EventSource("/sse/progress/");
         let isProcessing = false;
         let fileQueue = [];
@@ -623,11 +880,10 @@
             const downloadBtn = document.getElementsByClassName("download")[0];
             const removeBtn = document.getElementsByClassName("remove")[0];
             const loader = document.getElementsByClassName("loader")[0];
-            document.querySelector(".nav ul").style.zIndex = 0;
             
             const handleClose = function() {
                 loader.style.display = "flex";
-                showmedia.style.display = "none";
+                showmedia.classList.remove("active");
                 document.body.classList.remove("no-scroll");
                 if (document.getElementsByClassName("showMedia__image").length > 0)
                     document.getElementsByClassName("showMedia__image")[0].remove();
@@ -662,11 +918,18 @@
 
             const handleRemove = function() {
                 let rmid = message.substring(message.lastIndexOf("-")+1, message.lastIndexOf("-")+9);
-                document.getElementById(id).remove();
-                if (document.getElementById(rmid).nextSibling.classList.contains("item_date"))
-                    document.getElementById(rmid).remove();
+                const itemElement = document.getElementById(id);
+                const dateElement = document.getElementById(rmid);
+
+                itemElement.remove();
+
+                // Check if there are any remaining items for this date
+                if (dateElement && !dateElement.nextElementSibling.classList.contains("gallery__item")) {
+                    dateElement.remove();
+                }
+
                 removeBtn.removeEventListener("click", handleRemove);
-                closeBtn.click()
+                closeBtn.click();
 
                 const xhr = new XMLHttpRequest();
                 xhr.open('GET', `/remove/?session_string=${sessionString}&id=${id}`);
@@ -682,7 +945,7 @@
             }
             removeBtn.addEventListener("click", handleRemove);
 
-            showmedia.style.display = "flex";
+            showmedia.classList.add("active");
             document.body.classList.add("no-scroll");
 
             if (type == "image") {
@@ -833,10 +1096,11 @@
 
         fileInput.addEventListener('change', (e) => {
             e.preventDefault();
-            handleFiles(e.target.files);
+            addFilesToQueue(e.target.files);
         });
 
         function addFilesToQueue(files) {
+            showUploadPopup()
             for (const file of files) {
                 fileQueue.push(file);
                 const listItem = document.createElement('li');
@@ -903,7 +1167,7 @@
 
         function processQueue() {
             if (fileQueue.length === 0) {
-                uploadPopup.style.display = 'none';
+                hideUploadPopup();
                 isProcessing = false;
                 return;
             }
@@ -911,7 +1175,7 @@
             if (activeUploads >= MAX_CONCURRENT_UPLOADS) return;
 
             isProcessing = true;
-            uploadPopup.style.display = 'block';
+            showUploadPopup();
 
             const file = fileQueue.shift();
             activeUploads++;
@@ -949,7 +1213,7 @@
             xhr.open('POST', `/upload/`);
             xhr.send(formData);
 
-            processQueue(); // Start next upload if possible
+            processQueue();
         }
 
         document.addEventListener('dragenter', (e) => {
@@ -967,7 +1231,7 @@
             dropZone.style.display = 'none';
         });
 
-        document.getElementById("logout").addEventListener("click", function() {
+        document.getElementById('logout').addEventListener('click', function() {
             const formData = new FormData();
             formData.append('session_string', sessionString);
             const xhr = new XMLHttpRequest();
@@ -981,34 +1245,7 @@
             xhr.send(formData);
         });
 
-        document.getElementsByClassName("menu-btn")[0].addEventListener("click", function() {
-            const navUl = document.querySelector(".nav ul");
-            const mediaQuery = window.matchMedia("(max-width: 767px)");
-            const nav = document.querySelector(".nav ul");
-            
-            function handleNavDisplay() {
-                if (mediaQuery.matches) {
-                    if (navUl.style.display === "flex") {
-                        navUl.style.display = "none";
-                    } else {
-                        navUl.style.display = "flex";
-                        nav.style.zIndex = "1";
-                        document.addEventListener("click", function hideNav(event) {
-                            if (!navUl.contains(event.target) && !event.target.closest(".menu-btn")) {
-                                navUl.style.display = "none";
-                                document.removeEventListener("click", hideNav);
-                            }
-                        });
-                    }
-                } else {
-                    navUl.style.display = "flex";
-                    nav.style.zIndex = "1";
-                }
-            }
-
-            mediaQuery.addEventListener("change", handleNavDisplay);
-            handleNavDisplay();
-        });
+        // Removed menu-btn event listener and related functions
 
         function debounce(func, wait) {
             let timeout;
@@ -1020,23 +1257,43 @@
 
         const handleCheckboxChange = debounce(() => {
             const checkboxes = document.querySelectorAll('.gallery__checkbox');
-            const menuOptions = document.getElementById('menu-options');
-            const anyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+            const floatingBar = document.getElementById('floating-bar');
+            const selectedCount = document.getElementById('selected-count');
+            const galleryContainer = document.querySelector('.gallery-container');
+            const checkedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
+            const anyChecked = checkedCheckboxes.length > 0;
 
-            checkboxes.forEach(checkbox => {
-                checkbox.style.display = anyChecked ? 'block' : 'none';
-            });
+            if (anyChecked) {
+                floatingBar.classList.add('show'); // Show floating bar with animation
+                galleryContainer.classList.add('show-checkboxes'); // Show all checkboxes
+            } else {
+                floatingBar.classList.remove('show'); // Hide floating bar
+                galleryContainer.classList.remove('show-checkboxes'); // Hide all checkboxes
+            }
 
-            menuOptions.style.display = anyChecked ? 'block' : 'none';
+            selectedCount.textContent = `${checkedCheckboxes.length} items selected`;
         }, 300);
 
-        function showCheckbox(event) {
-            event.currentTarget.querySelector('.gallery__checkbox').style.display = 'block';
-        }
+        document.getElementById('close-bar').addEventListener('click', () => {
+            const checkboxes = document.querySelectorAll('.gallery__checkbox');
+            checkboxes.forEach(checkbox => checkbox.checked = false);
+            document.getElementById('floating-bar').classList.remove('show');
+            document.querySelector('.gallery-container').classList.remove('show-checkboxes');
+        });
 
-        function hideCheckbox(event) {
-            event.currentTarget.querySelector('.gallery__checkbox').style.display = 'none';
-        }
+        // Initialize hover behavior
+        document.querySelectorAll('.gallery__item').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                if (!document.querySelector('.gallery-container').classList.contains('show-checkboxes')) {
+                    item.querySelector('.gallery__checkbox').style.display = 'block';
+                }
+            });
+            item.addEventListener('mouseleave', () => {
+                if (!document.querySelector('.gallery-container').classList.contains('show-checkboxes')) {
+                    item.querySelector('.gallery__checkbox').style.display = 'none';
+                }
+            });
+        });
 
         document.getElementById('download-selected').addEventListener('click', async function() {
             const selectedItems = document.querySelectorAll('.gallery__checkbox:checked');
@@ -1083,12 +1340,10 @@
             const xhr = new XMLHttpRequest();
             xhr.open('POST', `/remove-all/`);
             xhr.send(formData);
-        });
 
-        // Initialize hover behavior
-        document.querySelectorAll('.gallery__item').forEach(item => {
-            item.addEventListener('mouseenter', showCheckbox);
-            item.addEventListener('mouseleave', hideCheckbox);
+            // Hide floating bar and checkboxes
+            document.getElementById('floating-bar').classList.remove('show');
+            document.querySelector('.gallery-container').classList.remove('show-checkboxes');
         });
 
         // Function to show the upload popup
@@ -1107,6 +1362,21 @@
             listMedia()
         else
             location.href = "/login"
+
+        document.getElementById('profile-icon').addEventListener('click', function() {
+            const dropdownMenu = document.getElementById('dropdown-menu');
+            dropdownMenu.classList.toggle('show');
+        });
+
+        // Close the dropdown if clicked outside
+        window.addEventListener('click', function(event) {
+            if (!event.target.matches('.profile-icon')) {
+                const dropdownMenu = document.getElementById('dropdown-menu');
+                if (dropdownMenu.classList.contains('show')) {
+                    dropdownMenu.classList.remove('show');
+                }
+            }
+        });
 
     </script>
 </body>
